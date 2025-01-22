@@ -101,12 +101,12 @@ img {
 }
 
 .borderedcol-2 {
-    width: 14%;
+    width: 10%;
     text-align: left;
 }
 
 .borderedcol-3 {
-    width: 35%;
+    width: 25%;
     text-align: left;
 }
 
@@ -116,7 +116,7 @@ img {
 }
 
 .borderedcol-5 {
-    width: 7%;
+    width: 6%;
     text-align: center;
 }
 
@@ -126,7 +126,7 @@ img {
 }
 
 .borderedcol-7 {
-    width: 7%;
+    width: 6%;
     text-align: center;
 }
 
@@ -137,6 +137,11 @@ img {
 
 .borderedcol-9 {
     width: 15%;
+    text-align: center;
+}
+
+.borderedcol-10 {
+    width: 16%;
     text-align: center;
 }
 
@@ -292,12 +297,12 @@ img {
     }
 
     .borderedcol-2 {
-        width: 14%;
+        width: 10%;
         text-align: left;
     }
 
     .borderedcol-3 {
-        width: 35%;
+        width: 25%;
         text-align: left;
     }
 
@@ -307,7 +312,7 @@ img {
     }
 
     .borderedcol-5 {
-        width: 7%;
+        width: 6%;
         text-align: center;
     }
 
@@ -317,7 +322,7 @@ img {
     }
 
     .borderedcol-7 {
-        width: 7%;
+        width: 6%;
         text-align: center;
     }
 
@@ -328,6 +333,11 @@ img {
 
     .borderedcol-9 {
         width: 15%;
+        text-align: center;
+    }
+
+    .borderedcol-10 {
+        width: 16%;
         text-align: center;
     }
 

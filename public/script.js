@@ -353,6 +353,7 @@ function displayDetailData(filteredRows) {
                 <td class="borderedcol-7">${item.slXuatQuydoi || ''}</td>
                 <td class="borderedcol-8">${item.vitriKehang || ''}</td>
                 <td class="borderedcol-9">${item.ghiChuItem || ''}</td>
+                <td class="borderedcol-10">${item.huongdandGhinhan || ''}</td>
             </tr>
         `;
     });
@@ -371,6 +372,7 @@ function extractDetailDataFromRow(row) {
         slXuatQuydoi: row[8],
         vitriKehang: row[10],
         ghiChuItem: row[12],
+        huongdandGhinhan: row[13],
     };
 }
 
