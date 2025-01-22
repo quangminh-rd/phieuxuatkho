@@ -140,7 +140,7 @@ function formatWithCommas(numberString) {
 
 const SPREADSHEET_ID = '1kb0cieDcUElLmMaEcsNPptIXJs0ZNAu_aaCcmU0aDAU';
 const RANGE = 'xuat_chuyen_kho!A:L'; // Mở rộng phạm vi đến cột L
-const RANGE_CHITIET = 'xuat_chuyen_kho_chi_tiet!C:O'; // Dải dữ liệu từ sheet 'don_hang_chi_tiet'
+const RANGE_CHITIET = 'xuat_chuyen_kho_chi_tiet!C:Q'; // Dải dữ liệu từ sheet 'don_hang_chi_tiet'
 const API_KEY = 'AIzaSyA9g2qFUolpsu3_HVHOebdZb0NXnQgXlFM';
 
 // Lấy giá trị từ URI sau dấu "?" cho các tham số cụ thể
