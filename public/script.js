@@ -274,12 +274,12 @@ async function findRowInSheet(maPhieuxuatURI) {
                 orderDetails = {
                     maPhieuXuat: row[0] || '', // Cột A
                     xuongSanXuat: row[2] || '', // Cột C
-                    ngayXuat: row[5] || '', // Cột F
-                    thangXuat: row[4] || '', // Cột E
-                    namXuat: row[3] || '', // Cột D
-                    xuatTaiKho: uriData.xuatTaiKhoURI || row[9] || '', // Cột J
-                    nhapTaiKho: uriData.nhapTaiKhoURI || row[10] || '', // Cột K
-                    ghiChu: row[11] || '', // Cột L
+                    ngayXuat: row[6] || '', // Cột G
+                    thangXuat: row[5] || '', // Cột F
+                    namXuat: row[4] || '', // Cột E
+                    xuatTaiKho: uriData.xuatTaiKhoURI || row[10] || '', // Cột K
+                    nhapTaiKho: uriData.nhapTaiKhoURI || row[11] || '', // Cột L
+                    ghiChu: row[12] || '', // Cột M
                 };
 
                 // Cập nhật nội dung HTML
