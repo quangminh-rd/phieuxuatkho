@@ -339,8 +339,13 @@ function displayDetailData(filteredRows) {
     const tableBody = document.getElementById('itemTableBody');
     tableBody.innerHTML = ''; // Xóa dữ liệu cũ nếu có
 
+    let totalSlXuatQuydoi = 0;
+
     filteredRows.forEach(row => {
-        const item = extractDetailDataFromRow(row);;
+        const item = extractDetailDataFromRow(row);
+
+        // Cộng dồn số lượng
+        totalSlXuatQuydoi += parseFloat(item.slXuatQuydoi) || 0;
 
         tableBody.innerHTML += `
             <tr class="bordered-table">
@@ -357,6 +362,19 @@ function displayDetailData(filteredRows) {
             </tr>
         `;
     });
+
+    // Thêm dòng tổng vào cuối bảng
+    tableBody.innerHTML += `
+        <tr class="bordered-table font-bold bg-gray-200">
+            <th class="borderedcol-1" colspan="4" style="text-align: right;">Tổng:</th>
+            <th class="borderedcol-5"></th>
+            <th class="borderedcol-6"></th>
+            <th class="borderedcol-7">${totalSlXuatQuydoi}</th>
+            <th class="borderedcol-8"></th>
+            <th class="borderedcol-9"></th>
+            <th class="borderedcol-10"></th>
+        </tr>
+        `;
 }
 
 
