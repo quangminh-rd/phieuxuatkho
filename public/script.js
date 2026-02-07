@@ -168,32 +168,105 @@ function getDataFromURI() {
 function extractDay(dateString) {
     if (!dateString) return '';
 
-    // Chuẩn hóa định dạng ngày về "DD/MM/YYYY"
-    const parts = dateString.split(/[-/]/); // Chấp nhận cả "-" và "/"
-    if (parts.length === 3) {
-        let day, month, year;
-
-        if (parts[0].length === 4) {
-            // Định dạng ban đầu là "YYYY/MM/DD" hoặc "YYYY-MM-DD"
-            [year, month, day] = parts;
-        } else if (parts[1].length === 4) {
-            // Định dạng ban đầu là "DD/MM/YYYY" (đã đúng)
-            [day, month, year] = parts;
-        } else {
-            // Giả định định dạng "MM/DD/YYYY"
-            [month, day, year] = parts;
+    // Xử lý cho định dạng dd/mm/yyyy hoặc d/m/yyyy
+    const parts = dateString.split('/');
+    if (parts.length !== 3) {
+        // Thử tách bằng dấu gạch ngang
+        const dashParts = dateString.split('-');
+        if (dashParts.length === 3) {
+            // Nếu định dạng là yyyy-mm-dd
+            if (dashParts[0].length === 4) {
+                // Định dạng yyyy-mm-dd
+                return dashParts[2].padStart(2, '0'); // Lấy ngày, thêm số 0 nếu cần
+            } else if (dashParts[2].length === 4) {
+                // Định dạng dd-mm-yyyy
+                return dashParts[0].padStart(2, '0'); // Lấy ngày
+            }
         }
-
-        // Đảm bảo các phần đều đủ 2 chữ số (nếu cần)
-        day = day.padStart(2, '0');
-        month = month.padStart(2, '0');
-
-        // Chuẩn hóa thành "DD/MM/YYYY"
-        dateString = `${day}/${month}/${year}`;
+        return '';
     }
 
-    // Trích xuất ngày từ định dạng "DD/MM/YYYY"
-    return dateString.split('/')[0];
+    // Phân tích định dạng dd/mm/yyyy
+    let day, month, year;
+
+    // Xác định phần nào là ngày, tháng, năm
+    if (parts[2].length === 4) {
+        // Định dạng dd/mm/yyyy hoặc d/m/yyyy
+        day = parts[0];
+        month = parts[1];
+        year = parts[2];
+    } else if (parts[0].length === 4) {
+        // Định dạng yyyy/mm/dd
+        year = parts[0];
+        month = parts[1];
+        day = parts[2];
+    } else {
+        // Không xác định, mặc định là dd/mm/yyyy
+        day = parts[0];
+        month = parts[1];
+        year = parts[2];
+    }
+
+    // Trả về ngày đã được định dạng (2 chữ số)
+    return parseInt(day).toString().padStart(2, '0');
+}
+
+// Thêm hàm để lấy tháng từ ngày
+function extractMonth(dateString) {
+    if (!dateString) return '';
+
+    const parts = dateString.split('/');
+    if (parts.length !== 3) {
+        const dashParts = dateString.split('-');
+        if (dashParts.length === 3) {
+            if (dashParts[0].length === 4) {
+                return dashParts[1].padStart(2, '0');
+            } else if (dashParts[2].length === 4) {
+                return dashParts[1].padStart(2, '0');
+            }
+        }
+        return '';
+    }
+
+    let month;
+    if (parts[2].length === 4) {
+        month = parts[1];
+    } else if (parts[0].length === 4) {
+        month = parts[1];
+    } else {
+        month = parts[1];
+    }
+
+    return parseInt(month).toString().padStart(2, '0');
+}
+
+// Thêm hàm để lấy năm từ ngày
+function extractYear(dateString) {
+    if (!dateString) return '';
+
+    const parts = dateString.split('/');
+    if (parts.length !== 3) {
+        const dashParts = dateString.split('-');
+        if (dashParts.length === 3) {
+            if (dashParts[0].length === 4) {
+                return dashParts[0];
+            } else if (dashParts[2].length === 4) {
+                return dashParts[2];
+            }
+        }
+        return '';
+    }
+
+    let year;
+    if (parts[2].length === 4) {
+        year = parts[2];
+    } else if (parts[0].length === 4) {
+        year = parts[0];
+    } else {
+        year = parts[2];
+    }
+
+    return year;
 }
 
 
@@ -270,13 +343,17 @@ async function findRowInSheet(maPhieuxuatURI) {
 
             const bColumnValue = row[0]; // Cột A
             if (bColumnValue === maPhieuxuatURI) {
+                // Lấy ngày tháng năm từ cột G
+                const ngayXuatFull = row[6] || '';
+
                 // Lưu dữ liệu vào biến toàn cục
                 orderDetails = {
                     maPhieuXuat: row[0] || '', // Cột A
                     xuongSanXuat: row[2] || '', // Cột C
-                    ngayXuat: row[6] || '', // Cột G
-                    thangXuat: row[5] || '', // Cột F
-                    namXuat: row[4] || '', // Cột E
+                    ngayXuat: ngayXuatFull, // Toàn bộ ngày từ cột G
+                    // Sử dụng hàm extract để lấy ngày, tháng, năm từ ngàyXuat
+                    thangXuat: row[5] || '', // Cột F (có thể giữ nguyên hoặc dùng từ ngàyXuat)
+                    namXuat: row[4] || '', // Cột E (có thể giữ nguyên hoặc dùng từ ngàyXuat)
                     xuatTaiKho: uriData.xuatTaiKhoURI || row[10] || '', // Cột K
                     nhapTaiKho: uriData.nhapTaiKhoURI || row[11] || '', // Cột L
                     ghiChu: row[12] || '', // Cột M
@@ -285,9 +362,18 @@ async function findRowInSheet(maPhieuxuatURI) {
                 // Cập nhật nội dung HTML
                 document.getElementById('maPhieuXuat').textContent = orderDetails.maPhieuXuat;
                 document.getElementById('xuongSanXuat').textContent = orderDetails.xuongSanXuat;
+
+                // Sử dụng hàm extract để lấy ngày, tháng, năm
                 document.getElementById('ngayXuat').textContent = extractDay(orderDetails.ngayXuat);
-                document.getElementById('thangXuat').textContent = orderDetails.thangXuat;
-                document.getElementById('namXuat').textContent = orderDetails.namXuat;
+
+                // Ưu tiên lấy tháng từ cột G, nếu không có thì dùng từ cột F
+                const thangTuNgayXuat = extractMonth(orderDetails.ngayXuat);
+                document.getElementById('thangXuat').textContent = thangTuNgayXuat || orderDetails.thangXuat;
+
+                // Ưu tiên lấy năm từ cột G, nếu không có thì dùng từ cột E
+                const namTuNgayXuat = extractYear(orderDetails.ngayXuat);
+                document.getElementById('namXuat').textContent = namTuNgayXuat || orderDetails.namXuat;
+
                 document.getElementById('xuatTaiKho').textContent = orderDetails.xuatTaiKho;
                 document.getElementById('nhapTaiKho').textContent = orderDetails.nhapTaiKho;
                 document.getElementById('ghiChu').textContent = orderDetails.ghiChu;
@@ -300,11 +386,6 @@ async function findRowInSheet(maPhieuxuatURI) {
     } catch (error) {
         updateContent('Error fetching data: ' + error.message);
         console.error('Fetch Error:', error);
-    }
-
-    function updateContent(message) {
-        // Hàm để xử lý thông báo lỗi hoặc cập nhật chung
-        alert(message);
     }
 }
 
