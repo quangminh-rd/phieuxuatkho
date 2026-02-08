@@ -335,6 +335,77 @@ async function findDetailsInSheet(maPhieuxuatURI) {
     }
 }
 
+// Hàm chuyển đổi chuỗi số từ định dạng Google Sheets (dấu . phân cách nghìn, dấu , thập phân)
+function parseNumberFromSheet(value) {
+    if (!value) return '';
+
+    // Nếu đã là số thì trả về luôn
+    if (typeof value === 'number') return value;
+
+    // Chuẩn hóa: loại bỏ tất cả dấu . (phân cách nghìn)
+    let normalized = value.toString().replace(/\./g, '');
+
+    // Thay dấu , thành . để JavaScript có thể parse thành số
+    normalized = normalized.replace(',', '.');
+
+    // Parse thành số
+    const num = parseFloat(normalized);
+
+    // Kiểm tra nếu là NaN thì trả về chuỗi rỗng
+    return isNaN(num) ? '' : num;
+}
+
+// Hàm định dạng số hiển thị theo kiểu Việt Nam (không có dấu phân cách nghìn, dấu , thập phân)
+function formatNumberForDisplay(number) {
+    if (number === '' || number === null || number === undefined) return '';
+
+    // Chuyển số thành chuỗi
+    let str = number.toString();
+
+    // Nếu có dấu . thập phân, thay bằng dấu ,
+    if (str.includes('.')) {
+        // Tách phần nguyên và phần thập phân
+        const parts = str.split('.');
+
+        // Giữ nguyên phần nguyên (không thêm dấu phân cách nghìn)
+        let integerPart = parts[0];
+
+        // Giữ nguyên phần thập phân
+        let decimalPart = parts[1];
+
+        // Ghép lại với dấu ,
+        str = integerPart + ',' + decimalPart;
+    }
+
+    return str;
+}
+
+// Trích xuất dữ liệu từ hàng
+function extractDetailDataFromRow(row) {
+    // Parse số lượng từ Google Sheets
+    const slXuatRaw = row[6];
+    const slXuatParsed = parseNumberFromSheet(slXuatRaw);
+    const slXuatFormatted = formatNumberForDisplay(slXuatParsed);
+
+    const slXuatQuydoiRaw = row[8];
+    const slXuatQuydoiParsed = parseNumberFromSheet(slXuatQuydoiRaw);
+    const slXuatQuydoiFormatted = formatNumberForDisplay(slXuatQuydoiParsed);
+
+    return {
+        sttTrongdon: row[1],
+        maVattu: row[2],
+        tenVattu: row[3],
+        dvt: row[7],
+        slXuat: slXuatFormatted, // Đã định dạng đúng
+        dvtQuydoi: row[9],
+        slXuatQuydoi: slXuatQuydoiFormatted, // Đã định dạng đúng
+        slXuatQuydoiParsed: slXuatQuydoiParsed, // Giữ lại số để tính tổng
+        vitriKehang: row[10],
+        ghiChuItem: row[12],
+        huongdandGhinhan: row[13],
+    };
+}
+
 function displayDetailData(filteredRows) {
     const tableBody = document.getElementById('itemTableBody');
     tableBody.innerHTML = ''; // Xóa dữ liệu cũ nếu có
@@ -344,24 +415,27 @@ function displayDetailData(filteredRows) {
     filteredRows.forEach(row => {
         const item = extractDetailDataFromRow(row);
 
-        // Cộng dồn số lượng
-        totalSlXuatQuydoi += parseFloat(item.slXuatQuydoi) || 0;
+        // Cộng dồn số lượng (dùng giá trị đã parse)
+        totalSlXuatQuydoi += parseFloat(item.slXuatQuydoiParsed) || 0;
 
         tableBody.innerHTML += `
-            <tr class="bordered-table">
-                <td class="borderedcol-1">${item.sttTrongdon || ''}</td>
-                <td class="borderedcol-2">${item.maVattu || ''}</td>
-                <td class="borderedcol-3">${item.tenVattu || ''}</td>
-                <td class="borderedcol-4">${item.dvt || ''}</td>
-                <td class="borderedcol-5">${item.slXuat || ''}</td>
-                <td class="borderedcol-6">${item.dvtQuydoi || ''}</td>
-                <td class="borderedcol-7">${item.slXuatQuydoi || ''}</td>
-                <td class="borderedcol-8">${item.vitriKehang || ''}</td>
-                <td class="borderedcol-9">${item.ghiChuItem || ''}</td>
-                <td class="borderedcol-10">${item.huongdandGhinhan || ''}</td>
-            </tr>
-        `;
+        <tr class="bordered-table">
+            <td class="borderedcol-1">${item.sttTrongdon || ''}</td>
+            <td class="borderedcol-2">${item.maVattu || ''}</td>
+            <td class="borderedcol-3">${item.tenVattu || ''}</td>
+            <td class="borderedcol-4">${item.dvt || ''}</td>
+            <td class="borderedcol-5">${item.slXuat || ''}</td>
+            <td class="borderedcol-6">${item.dvtQuydoi || ''}</td>
+            <td class="borderedcol-7">${item.slXuatQuydoi || ''}</td>
+            <td class="borderedcol-8">${item.vitriKehang || ''}</td>
+            <td class="borderedcol-9">${item.ghiChuItem || ''}</td>
+            <td class="borderedcol-10">${item.huongdandGhinhan || ''}</td>
+        </tr>
+    `;
     });
+
+    // Định dạng tổng cho hiển thị
+    const totalFormatted = formatNumberForDisplay(totalSlXuatQuydoi);
 
     // Thêm dòng tổng vào cuối bảng
     tableBody.innerHTML += `
@@ -369,29 +443,12 @@ function displayDetailData(filteredRows) {
             <th class="borderedcol-1" colspan="4" style="text-align: right;">Tổng:</th>
             <th class="borderedcol-5"></th>
             <th class="borderedcol-6"></th>
-            <th class="borderedcol-7">${totalSlXuatQuydoi}</th>
+            <th class="borderedcol-7">${totalFormatted}</th>
             <th class="borderedcol-8"></th>
             <th class="borderedcol-9"></th>
             <th class="borderedcol-10"></th>
         </tr>
         `;
-}
-
-
-// Trích xuất dữ liệu từ hàng
-function extractDetailDataFromRow(row) {
-    return {
-        sttTrongdon: row[1],
-        maVattu: row[2],
-        tenVattu: row[3],
-        dvt: row[7],
-        slXuat: row[6],
-        dvtQuydoi: row[9],
-        slXuatQuydoi: row[8],
-        vitriKehang: row[10],
-        ghiChuItem: row[12],
-        huongdandGhinhan: row[13],
-    };
 }
 
 // Hàm cập nhật nội dung DOM
